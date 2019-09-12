@@ -1,0 +1,211 @@
+A quick recipe is basically:
+
+1.Run the collector in the Swarm, 1 or more replicas, set its hostname to jaeger-collector, don't forget to set its args to point to ES or Cassandra, 
+whatever is your backend
+2.You need to run the agent on global mode so there's 1 instance on every node, pass ssomething like this to its 
+args --reporter.grpc.host-port=jaeger-collector:14250 so that it can communicate with the collector also running in the swarm
+3.Last, run the UI pointing to your backend (ES, C*)
+Don't use the all-in-one on Swarm, you have to deploy the 3 components separately
+If the agent is running on every Swarm node (global mode) then the applications can communicate with the local agent
+
+1.docker run \
+  -e SPAN_STORAGE_TYPE=cassandra \
+  -e CASSANDRA_SERVERS=<...> \
+  jaegertracing/jaeger-collector:1.14
+      OR
+docker run -d --name elasticsearch -e SPAN_STORAGE_TYPE=elasticsearch -e ES_SERVER_URLS=http://10.229.161.198:9200 jaegertracing/jaeger-collector:1.14
+
+
+docker run --rm --name jaeger-collector --link elasticsearch:elasticsearch -e SPAN_STORAGE_TYPE=elasticsearch -e ES_SERVER_URLS=http://localhost:9200 
+-e ES_USERNAME=elastic -p14267:14267 -p14268:14268 -p9411:9411 jaegertracing/jaeger-collector
+2.docker run \
+  --rm \
+  -p5775:5775/udp \
+  -p6831:6831/udp \
+  -p6832:6832/udp \
+  -p5778:5778/tcp \
+  jaegertracing/jaeger-agent:1.14 \
+  --reporter.grpc.host-port=jaeger-collector.jaeger-infra.svc:14250
+
+22:
+
+docker run -d --name jaeger-agent -p5775:5775/udp -p6831:6831/udp -p6832:6832/udp -p5778:5778/tcp jaegertracing/jaeger-agent:1.14 --reporter.grpc.host-port=jaeger-collector:8080
+
+3.docker run -d --rm \
+  -p 16686:16686 \
+  -p 16687:16687 \
+  -e SPAN_STORAGE_TYPE=elasticsearch \
+  -e ES_SERVER_URLS=http://<ES_SERVER_IP>:<ES_SERVER_PORT> \
+  jaegertracing/jaeger-query:1.14
+
+33 docker run -d --name jaeger-ui -p 80:16686 -p 16687:16687 -e SPAN_STORAGE_TYPE=elasticsearch -e ES_SERVER_URLS=http://10.229.161.198:8080 jaegertracing/jaeger-query:1.14
+---------------------------------------------------------------------------------
+I don't really have any. I use ansible playbooks but should be really simple to do the same using docker-compose 
+(I have no experience writing docker compose files, though).
+
+But if you can deploy stuff on Swarm, you can do this as well, just think of it as yet another microservice to deploy. 
+Just run the agent on every host with that command line argument. 
+Run the Collector (however many replicas you want) and just set their config args based on the deployment sectin of jaeger docs
+
+===========================
+docker run -d --name jaeger-collector -e SPAN_STORAGE_TYPE=elasticsearch -e ES_SERVER_URLS=http://10.229.161.198:8080 jaegertracing/jaeger-collector:1.14
+
+docker run -d --name jaeger-collector -e SPAN_STORAGE_TYPE=elasticsearch -e ES_SERVER_URLS=http://elasticsearch:9200
+ -e ES_USERNAME=elastic -p 14267:14267 -p 14268:14268 -p 9411:9411 jaegertracing/jaeger-collector
+---------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------
+Jaeger all-in-one ##
+docker run -d --name jaeger \
+  --network dockercompose_default \
+  -e COLLECTOR_ZIPKIN_HTTP_PORT=9411 \
+  -e HOSTNAME=jaeger \
+  -p 5775:5775/udp \
+  -p 6831:6831/udp \
+  -p 6832:6832/udp \
+  -p 5778:5778 \
+  -p 80:16686 \
+  -p 14268:14268 \
+  -p 9411:9411 \
+  jaegertracing/all-in-one:1.10
+
+this works
+
+ 	
+
+docker run --rm -itd --network dockercompose_default --link jaeger -p8090:8090 -e JAEGER_AGENT_HOST=jaeger -e JAEGER_SERVICE_NAME=hello_jaegerbittu123 -e JAEGER_AGENT_PORT=6831 -e JAEGER_SAMPLER_MANAGER_HOST_PORT=jaeger:5778 jaeger-app3
+
+on single node
+
+-----------------
+now i need to implement on diff nodes
+
+docker swarm 
+service create
+docker service create --replicas 3 --network my-network -e COLLECTOR_ZIPKIN_HTTP_PORT=9411 -e HOSTNAME=jaeger -p 5775:5775/udp -p 6831:6831/udp -p 6832:6832/udp -p 5778:5778 -p 80:16686 -p 14268:14268 -p 9411:9411 jaegertracing/all-in-one:1.10
+
+docker service create --replicas 2 --network my-network --link jaeger -p8080:8080 -e JAEGER_AGENT_HOST=jaeger -e JAEGER_SERVICE_NAME=hello_jaegerbittu143 -e JAEGER_AGENT_PORT=6831 -e JAEGER_SAMPLER_MANAGER_HOST_PORT=jaeger:5778 --name demoservice2 opentracing_demo_demo
+
+
+docker run \
+  -d \
+  -p5775:5775/udp \
+  -p6831:6831/udp \
+  -p6832:6832/udp \
+  -p5778:5778/tcp \
+  jaegertracing/jaeger-agent:1.14 \
+  --reporter.grpc.host-port=jaeger-collector.jaeger-infra.svc:14250
+
+docker service create \
+  --replicas 3 \
+  --network my-network \
+  --name my-web \
+  nginx
+==============
+
+
+
+#connect([username],[password],[admin url])
+connect('autosc','aut0scadm1n','t3://olc-app-dev-01.am.health.ge.com:19696')
+servers=cmo.getServers()
+print "-------------------------------------------------------"
+print "\t"+cmo.getName()+" domain status"
+print "-------------------------------------------------------"
+for server in servers:
+        state(server.getName(),server.getType())
+print "-------------------------------------------------------"
+
+
+
+
+docker run --rm -p5775:5775/udp -p6831:6831/udp -p6832:6832/udp -p5778:5778/tcp jaegertracing/jaeger-agent:1.14 --reporter.grpc.host-port=jaeger-collector:14250
+
+
+====================
+docker run --rm -d -p 8080:8080 --link jaeger -e JAEGER_ENDPOINT="http://10.229.161.198:14268/api/traces" jaeger-app
+
+docker run -d --name jaeger -e COLLECTOR_ZIPKIN_HTTP_PORT=9411 -p 5775:5775/udp -p 6831:6831/udp -p 6832:6832/udp -p 5778:5778 -p 80:16686 -p 14268:14268 -p 9411:9411 jaegertracing/all-in-one:latest
+
+docker run --rm -d --link jaeger --env JAEGER_AGENT_HOST=jaeger --env JAEGER_AGENT_PORT=6831 -p 8080:8080 jaeger-app
+
+docker run -d -p 8090:8090 --env JAEGER_SERVICE_NAME=hello_jaeger123 --env JAEGER_AGENT_HOST=jaeger --env JAEGER_AGENT_PORT=6831 --env JAEGER_SAMPLER_MANAGER_HOST_PORT=jaeger:5778 jaeger-app 
+docker run \
+  -d \
+  -p6831:6831/udp \
+  -p6832:6832/udp \
+  -p5778:5778/tcp \
+  -p5775:5775/udp \
+  jaegertracing/jaeger-agent:1.14
+
+docker run -d --name jaeger \
+  --network dockercompose_default \
+  -e COLLECTOR_ZIPKIN_HTTP_PORT=9411 \
+  -e HOSTNAME=jaeger \
+  -p 5775:5775/udp \
+  -p 6831:6831/udp \
+  -p 6832:6832/udp \
+  -p 5778:5778 \
+  -p 80:16686 \
+  -p 14268:14268 \
+  -p 9411:9411 \
+  jaegertracing/all-in-one:1.10
+
+version: '2'
+
+services:           
+    demo:
+            image: jaeger-app
+            ports: 
+                    - "8080:8080"
+            environment: 
+                    - JAEGER_SERVICE_NAME=hello_service
+                    - JAEGER_AGENT_HOST=jaeger
+                    - JAEGER_AGENT_PORT=6831     
+                    - JAEGER_SAMPLER_MANAGER_HOST_PORT=jaeger:5778
+    jaeger: 
+            image: jaegertracing/all-in-one:latest
+            ports:
+                    - "5775:5775/udp"
+                    - "6831:6831/udp"
+                    - "6832:6832/udp"
+                    - "5778:5778"
+                    - "80:16686"
+                    - "14268:14268"
+                    - "9411:9411"
+
+
+version: '2'
+
+services:           
+        demo:
+                build: opentracing_demo/.
+                ports: 
+                        - "8080:8080"
+                environment: 
+                        - JAEGER_SERVICE_NAME=hello_service
+                        - JAEGER_AGENT_HOST=jaeger
+                        - JAEGER_AGENT_PORT=6831 
+                        - JAEGER_SAMPLER_MANAGER_HOST_PORT=jaeger:5778
+
+       app2: 
+               image: jaeger-app
+               ports: 
+                       - "8090:8090"
+               environment: 
+                       - JAEGER_SERVICE_NAME=hello_jaeger2nd
+                       - JAEGER_AGENT_HOST=jaeger
+                       - JAEGER_AGENT_PORT=6831 
+                       - JAEGER_SAMPLER_MANAGER_HOST_PORT=jaeger:5778
+
+
+      docker service create --replicas 3 -p 8080:8080 --env JAEGER_SERVICE_NAME=hello_jaeger123 --env JAEGER_AGENT_HOST=jaeger --env JAEGER_AGENT_PORT=6831 --env JAEGER_SAMPLER_MANAGER_HOST_PORT=jaeger:5778 --name service2 opentracing_demo_demo               
+       
+      docker run -d -p 8090:8080 --env JAEGER_SERVICE_NAME=hello_jaeger123123 --env JAEGER_AGENT_HOST=jaeger --env JAEGER_AGENT_PORT=6831 --env JAEGER_SAMPLER_MANAGER_HOST_PORT=jaeger:5778 opentracing_demo_demo 
+
+      docker service create \
+        --name service123 \
+        --replicas 3 \
+        --env JAEGER_SERVICE_NAME=hello_service1234 \
+        --env JAEGER_AGENT_HOST=jaeger \
+        --env JAEGER_AGENT_PORT=6831 \
+        --env JAEGER_SAMPLER_MANAGER_HOST_PORT=jaeger:5778 \
+        opentracing_demo_demo
