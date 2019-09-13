@@ -1,0 +1,45 @@
+[root@ip-172-31-86-140 ~]# history
+    1  java -version
+    2  sudo yum -y install java-1.8.0-openjdk
+    3  sudo yum -y remove java-1.7.0-openjdk
+    4  java -version
+    5  yum install docker -y
+    6  service docker start
+    7  docker run -d --name elasticsearch --restart=always -p 9200:9200 -p 9300:9300 -e ES_JAVA_OPTS="-Xms512m -Xmx512m" elasticsearch:5.6.4
+    8  docker ps
+    9  curl localhost:9200
+   10  docker run -d --name jaeger-collector -e SPAN_STORAGE_TYPE=elasticsearch -e ES_SERVER_URLS=http://3.84.89.113:9200/
+   11  -e ES_USERNAME=elastic -p 14267:14267 -p 14268:14268 -p 9411:9411 jaegertracing/jaeger-collectordocker run -d --name jaeger-collector -e SPAN_STORAGE_TYPE=elasticsearch -e ES_SERVER_URLS=http://3.84.89.113:9200/ -e ES_USERNAME=elastic -p 14267:14267 -p 14268:14268 -p 9411:9411 jaegertracing/jaeger-collector
+   12  docker run -d --name jaeger-collector -e SPAN_STORAGE_TYPE=elasticsearch -e ES_SERVER_URLS=http://3.84.89.113:9200/ -e ES_USERNAME=elastic -p 14267:14267 -p 14268:14268 -p 9411:9411 jaegertracing/jaeger-collector
+   13  docker ps
+   14  docker run -d --name jaeger-query -e SPAN_STORAGE_TYPE=elasticsearch -e ES_SERVER_URLS=http://3.84.89.113:9200 -p 16686:16686/tcp jaegertracing/jaeger-query
+   15  docker ps
+   16  docker run -d --name jaeger-agent -p5775:5775/udp -p6831:6831/udp -p6832:6832/udp -p5778:5778/tcp jaegertracing/jaeger-agent:1.14 --reporter.grpc.host-port=jaeger-collector:14250
+   17  docker ps
+   18  docker run   --rm   --link jaeger   --env JAEGER_AGENT_HOST=jaeger   --env JAEGER_AGENT_PORT=6831   -p8080-8083:8080-8083   jaegertracing/example-hotrod:latest   all
+   19  docker run -d --link jaeger --env JAEGER_AGENT_HOST=jaeger --env JAEGER_AGENT_PORT=6831 -p8080-8083:8080-8083 jaegertracing/example-hotrod:latest all
+   20  docker ps
+   21  docker run -d --link jaeger-agent --env JAEGER_AGENT_HOST=jaeger --env JAEGER_AGENT_PORT=6831 -p8080-8083:8080-8083 jaegertracing/example-hotrod:latest all
+   22  docker [s
+   23  docker ps
+   24  docker ps -a
+   25  docker run -d --name jaeger-collector -e SPAN_STORAGE_TYPE=elasticsearch -e ES_SERVER_URLS=http://3.84.89.113:9200/ -e ES_USERNAME=elastic -p 14267:14267 -p 14268:14268 -p 9411:9411 jaegertracing/jaeger-collector
+   26  docker ps -a
+   27  docker rm -f d7bcac1d5076  377dfbfa8ff5 7e27ba6b378e 65ebba6507fe
+   28  docker run -d --name jaeger-collector -e SPAN_STORAGE_TYPE=elasticsearch -e ES_SERVER_URLS=http://3.84.89.113:9200/ -e ES_USERNAME=elastic -p 14267:14267 -p 14268:14268 -p 9411:9411 jaegertracing/jaeger-collector
+   29  docker ps
+   30  docker run -d --name jaeger-query -e SPAN_STORAGE_TYPE=elasticsearch -e ES_SERVER_URLS=http://3.84.89.113:9200 -p 16686:16686/tcp jaegertracing/jaeger-query
+   31  docker ps
+   32  docker run -d --name jaeger-agent -p 5775:5775/udp -p 6831:6831/udp -p 6832:6832/udp -p 5778:5778/tcp jaegertracing/jaeger-agent:1.14 --reporter.grpc.host-port=3.84.89.113:14267
+   33  docker ps
+   34  docker ps -a
+   35  docker ps
+   36  docker run -d --link jaeger-agent --env JAEGER_AGENT_HOST=jaeger-agent --env JAEGER_AGENT_PORT=6831 -p8080-8083:8080-8083 jaegertracing/example-hotrod:latest all
+   37  docker ps
+   38  docker logs 4837a4ffbfae
+   39  docker ps
+   40  docker rm -f 4837a4ffbfae
+   41  docker ps
+   42  docker run -d --link jaeger-collector:jaeger-collector --name jaeger-agent --restart=always -p 5775:5775/udp -p 6831:6831/udp -p 6832:6832/udp -p 5778:5778/tcp jaegertracing/jaeger-agent:1.14 --collector.host-port=3.84.89.113:14267
+   43  docker ps
+   44  history
