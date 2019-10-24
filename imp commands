@@ -1,0 +1,8 @@
+ IMP ******** docker service create --name books --network host books:latest*********
+ 
+ IMP****docker service create --name demo143143 --network host demo143:latest
+ 
+ 
+From openjdk:8
+copy ./target/books-0.0.1-SNAPSHOT.jar books-0.0.1-SNAPSHOT.jar
+CMD ["java","-jar","books-0.0.1-SNAPSHOT.jar"]
